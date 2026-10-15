@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reisiger 1000 Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=STIX+Two+Text:ital,wght@1,400&display=swap">
+<style>
+/* Layout: one equation across the screen. Five-column grid (value < value < value) with shared
+   rows for symbol / number / sub-line / label, so every baseline lines up. Single dark look. */
+:root {
+  --ink: #0b0a09;           /* warm near-black ground */
+  --gold-hi: #ecdcb8;       /* top of the gold numerals */
+  --gold: #c4b59d;          /* Reisiger taupe */
+  --gold-lo: #9c8a69;       /* bottom of the gold numerals */
+  --gold-dim: #6f6352;      /* separators, quiet text */
+  --line: #2a2620;          /* hairlines, track */
+  --f-num: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --f-math: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--ink); color: var(--gold);
+  font-family: var(--f-num); overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body.idle { cursor: none; }
+
+.stage {
+  height: 100%; box-sizing: border-box;
+  padding-inline: max(16px, 5vw); padding-block: 4vh;
+  display: grid; grid-template-rows: auto 1fr auto;
+  background: radial-gradient(ellipse 70% 55% at 50% 50%, #17140f 0%, var(--ink) 70%);
+}
+
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 40px; }
+.logo { height: clamp(22px, 3vh, 34px); width: auto; opacity: .9; }
+.controls { display: flex; gap: 8px; transition: opacity .6s; }
+body.idle .controls { opacity: 0; pointer-events: none; }
+.btn {
+  font: 500 13px/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); background: transparent; border: 1px solid var(--line);
+  padding: 10px 14px; border-radius: 2px; cursor: pointer;
+}
+.btn:hover { border-color: var(--gold-dim); color: var(--gold-hi); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* The equation */
+.eq {
+  align-self: center; justify-self: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto;
+  column-gap: clamp(16px, 4.5vw, 110px);
+  width: min(100%, 1700px);
+  text-align: center;
+}
+.term { display: contents; }
+.sym  { grid-row: 1; font: italic 400 clamp(28px, 5vh, 64px)/1 var(--f-math); color: var(--gold); padding-bottom: 3vh; }
+.num  {
+  grid-row: 2; font: 600 clamp(64px, 19vh, 240px)/0.95 var(--f-num);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
+  background: linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 55%, var(--gold-lo) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: filter .8s;
+}
+.num.flash { filter: drop-shadow(0 0 28px rgba(236, 220, 184, .55)); }
+.sub  {
+  grid-row: 3; padding-top: 1.6vh;
+  font: 500 clamp(18px, 3.4vh, 40px)/1 var(--f-num); font-variant-numeric: tabular-nums;
+  color: var(--gold); letter-spacing: .02em; min-height: 1em;
+}
+.sub small { font-size: .62em; color: var(--gold-dim); margin-left: .12em; margin-right: .5em; }
+.sub small:last-child { margin-right: 0; }
+.label {
+  grid-row: 4; padding-top: 2.2vh;
+  font: 400 clamp(13px, 2.2vh, 26px)/1 var(--f-num);
+  text-transform: uppercase; letter-spacing: .32em; color: var(--gold-dim);
+}
+.lt {
+  grid-row: 2; align-self: center;
+  font: 300 clamp(40px, 11vh, 140px)/1 var(--f-num); color: var(--gold-dim);
+}
+.c1 { grid-column: 1; } .c2 { grid-column: 3; } .c3 { grid-column: 5; }
+.lt.a { grid-column: 2; } .lt.b { grid-column: 4; }
+
+/* Footer: progress through the 1000 days */
+.foot { display: grid; gap: 12px; }
+.track { height: 2px; background: var(--line); position: relative; overflow: hidden; }
+.fill { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, var(--gold-lo), var(--gold-hi)); }
+.meta {
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  font: 400 clamp(11px, 1.6vh, 16px)/1.3 var(--f-num); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold-dim); font-variant-numeric: tabular-nums;
+}
+.meta b { color: var(--gold); font-weight: 500; }
+
+
+/* Narrow screens: stack the equation */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100%; }
+  .eq { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 0; }
+  .term { display: grid; justify-items: center; }
+  .sym, .num, .sub, .label, .lt { grid-row: auto; grid-column: 1; }
+  .c1, .c2, .c3 { grid-column: 1; }
+  .num { font-size: clamp(64px, 22vw, 120px); }
+  .lt { font-size: 40px; padding-block: 2vh; transform: rotate(90deg); }
+  .sym { padding-bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .num { transition: none; } .controls { transition: none; } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="top">
+    <img class="logo" alt="Reisiger" src="logo.png">
+    <div class="controls">
+      <button class="btn" id="fsBtn" type="button">Full screen</button>
+    </div>
+  </header>
+
+  <main class="eq" aria-live="polite">
+    <div class="term c1">
+      <div class="sym c1" aria-hidden="true">Δ</div>
+      <div class="num c1" id="days">1000</div>
+      <div class="sub c1" id="hms">00<small>h</small>00<small>m</small>00<small>s</small></div>
+      <div class="label c1">days</div>
+    </div>
+    <div class="lt a" aria-label="less than">&lt;</div>
+    <div class="term c2">
+      <div class="sym c2" aria-hidden="true">x</div>
+      <div class="num c2" id="assets">0</div>
+      <div class="sub c2" aria-hidden="true"></div>
+      <div class="label c2">assets</div>
+    </div>
+    <div class="lt b" aria-label="less than">&lt;</div>
+    <div class="term c3">
+      <div class="sym c3" aria-hidden="true">f(x)</div>
+      <div class="num c3" id="dists">0</div>
+      <div class="sub c3" aria-hidden="true"></div>
+      <div class="label c3">distributions</div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="meta">
+      <span>Day <b id="dayNo">1</b> of 1000</span>
+      <span id="updated">&nbsp;</span>
+      <span>Deadline <b id="deadline">—</b></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const DAY = 86400000, TOTAL_DAYS = 1000;
+  // The numbers live in counts.json next to this page; edit that file to update every screen.
+  const COUNTS_URL = "counts.json";
+  const POLL_MS = 2 * 60 * 1000;
+  const DEFAULTS = { start: "2026-10-15", assets: 0, distributions: 0, updated: null };
+
+  let state = Object.assign({}, DEFAULTS);
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const startMs = () => Date.parse(state.start + "T00:00:00+02:00");
+  const pad = (n) => String(n).padStart(2, "0");
+  const fmtDate = (ms) => new Date(ms).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" });
+
+  // Live clock
+  function tick() {
+    const s = startMs(), end = s + TOTAL_DAYS * DAY, now = Date.now();
+    const rem = Math.max(0, Math.min(end - now, TOTAL_DAYS * DAY));
+    const d = Math.floor(rem / DAY);
+    const h = Math.floor(rem % DAY / 3600000), m = Math.floor(rem % 3600000 / 60000), sec = Math.floor(rem % 60000 / 1000);
+    $("days").textContent = d;
+    $("hms").innerHTML = `${pad(h)}<small>h</small>${pad(m)}<small>m</small>${pad(sec)}<small>s</small>`;
+    const elapsed = Math.max(0, Math.min(now - s, TOTAL_DAYS * DAY));
+    $("fill").style.width = (elapsed / (TOTAL_DAYS * DAY) * 100).toFixed(4) + "%";
+    $("dayNo").textContent = now < s ? 0 : Math.min(TOTAL_DAYS, Math.floor(elapsed / DAY) + 1);
+    $("deadline").textContent = fmtDate(end);
+  }
+  function loop() { tick(); setTimeout(loop, 1000 - (Date.now() % 1000) + 5); }
+
+  // Counters roll up when they change
+  const shown = { assets: 0, dists: 0 };
+  function setCount(id, target) {
+    const el = $(id), from = shown[id];
+    shown[id] = target;
+    if (from === target) { el.textContent = target.toLocaleString("en-ZA"); return; }
+    el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600);
+    if (reduce) { el.textContent = target.toLocaleString("en-ZA"); return; }
+    const t0 = performance.now(), dur = 1400;
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (target - from) * e).toLocaleString("en-ZA");
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function render() {
+    setCount("assets", state.assets);
+    setCount("dists", state.distributions);
+    $("updated").innerHTML = state.updated ? `Updated <b>${fmtDate(Date.parse(state.updated + "T12:00:00+02:00"))}</b>` : "&nbsp;";
+    tick();
+  }
+
+  function apply(data) {
+    const n = (v) => Math.max(0, Math.floor(Number(v) || 0));
+    state = {
+      start: /^\d{4}-\d{2}-\d{2}$/.test(data.start) ? data.start : DEFAULTS.start,
+      assets: n(data.assets), distributions: n(data.distributions),
+      updated: /^\d{4}-\d{2}-\d{2}$/.test(data.updated) ? data.updated : null,
+    };
+    render();
+  }
+
+  // Full screen + keep the display awake
+  async function toggleFs() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch (e) { /* not available in this view */ }
+  }
+  $("fsBtn").addEventListener("click", toggleFs);
+  document.addEventListener("fullscreenchange", () => {
+    $("fsBtn").textContent = document.fullscreenElement ? "Exit full screen" : "Full screen";
+  });
+  let lock = null;
+  async function wake() { try { if (!lock && document.visibilityState === "visible") { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => { lock = null; }); } } catch (e) {} }
+  document.addEventListener("visibilitychange", wake);
+  document.addEventListener("click", wake, { once: true });
+  wake();
+
+  // Hide controls and cursor when the mouse rests
+  let idleT;
+  const wakeUi = () => { document.body.classList.remove("idle"); clearTimeout(idleT); idleT = setTimeout(() => { document.body.classList.add("idle"); }, 3000); };
+  ["mousemove", "keydown", "touchstart"].forEach((ev) => document.addEventListener(ev, wakeUi, { passive: true }));
+  wakeUi();
+
+  document.addEventListener("keydown", (e) => { if (e.key === "f" || e.key === "F") toggleFs(); });
+
+  // Pull the latest counts; a failed fetch keeps the last numbers on screen
+  async function pull() {
+    try {
+      const res = await fetch(COUNTS_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) apply(await res.json());
+    } catch (e) { /* offline for a moment: try again next poll */ }
+  }
+
+  // Reload once a day around 03:00 so page changes reach screens that never close
+  const loadedOn = new Date().toDateString();
+  setInterval(() => { const n = new Date(); if (n.getHours() === 3 && n.toDateString() !== loadedOn) location.reload(); }, 10 * 60 * 1000);
+
+  apply(state); loop(); pull();
+  setInterval(pull, POLL_MS);
+})();
+</script>
+
+</body>
+</html>
