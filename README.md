@@ -1,6 +1,6 @@
 # Reisiger 1000 Days
 
-Office countdown display: **Δ days < x assets < f(x) distributions**.
+Office countdown display: **θ days < λ assets < α distributions**.
 
 Live at **https://g-experiments.github.io/countdown/** — open it on any screen, no login needed.
 
